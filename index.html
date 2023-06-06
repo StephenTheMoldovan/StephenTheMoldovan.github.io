@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width, initial-scale=1.0">
+<style>
+    body {
+      background-color: gainsboro;
+    }
+
+    h1 {
+	  color: purple;
+      text-align: center;
+	  margin-top: 10px;
+    }
+
+    .container {
+      max-width: 360px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    .input-container {
+      margin-bottom: 10px;
+    }
+
+    .input-container input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+    }
+
+    .input-container button {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+  <title>Terapie tinitus</title>
+  <script>
+    var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    var oscillator;
+
+	function playFrequency() {
+      var frequency = parseInt(document.getElementById("inputNumber").value);
+
+      oscillator = audioContext.createOscillator();
+      oscillator.type = "sine";
+      oscillator.frequency.value = frequency;
+      oscillator.connect(audioContext.destination);
+      oscillator.start();
+    }
+
+	function stopFrequency() {
+      if (oscillator) {
+        oscillator.stop();
+        oscillator.disconnect();
+      }
+    }
+
+	function generateFrequency() {
+      var number = parseInt(document.getElementById("inputNumber").value);
+      var th = Math.floor(number / 1000);
+      var h = Math.floor((number % 1000) / 100);
+      var t = Math.floor((number % 100) / 10);
+
+      var sum1 = (th * 770) + (h * 70) + (t * 0);
+      var sum2 = (th * 900) + (h * 90) + (t * 0);
+      var sum3 = (th * 1090) + (h * 100) + (t * 10);
+      var sum4 = (th * 1390) + (h * 140) + (t * 10);
+
+      document.getElementById("tone1").textContent = "Tonul 1: " + sum1 + "Hz";
+      document.getElementById("tone2").textContent = "Tonul 2: " + sum2 + "Hz";
+      document.getElementById("tone3").textContent = "Tonul 3: " + sum3 + "Hz";
+      document.getElementById("tone4").textContent = "Tonul 4: " + sum4 + "Hz";
+
+      // Populate the tonesArray with the generated tones
+      tonesArray = [sum1, sum2, sum3, sum4];
+    }
+
+    function playTone(tone) {
+      var frequency;
+      switch (tone) {
+        case "Tone 1":
+          frequency = parseInt(document.getElementById("tone1").textContent.split(": ")[1]);
+          break;
+        case "Tone 2":
+          frequency = parseInt(document.getElementById("tone2").textContent.split(": ")[1]);
+          break;
+        case "Tone 3":
+          frequency = parseInt(document.getElementById("tone3").textContent.split(": ")[1]);
+          break;
+        case "Tone 4":
+          frequency = parseInt(document.getElementById("tone4").textContent.split(": ")[1]);
+          break;
+      }
+
+      oscillator = audioContext.createOscillator();
+      oscillator.type = "sine";
+      oscillator.frequency.value = frequency;
+      oscillator.connect(audioContext.destination);
+      oscillator.start();
+    }
+
+    function stopTone() {
+      if (oscillator) {
+        oscillator.stop();
+        oscillator.disconnect();
+      }
+    }
+
+	var toneLoop;
+	var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+	var currentIndex = 0;
+
+	function playRandomTones() {
+      var tones = [];
+      for (var i = 0; i < 12; i++) {
+        var randomIndex = Math.floor(Math.random() * tonesArray.length);
+        var frequency = tonesArray[randomIndex];
+        tones.push(frequency);
+      }
+
+      currentIndex = 0;
+      playToneSequence(tones);
+    }
+
+    function playToneSequence(tones) {
+      if (currentIndex < tones.length) {
+        var oscillator = audioContext.createOscillator();
+        oscillator.type = "sine";
+        oscillator.frequency.value = tones[currentIndex];
+        oscillator.connect(audioContext.destination);
+        oscillator.start();
+        setTimeout(function () {
+          oscillator.stop();
+          currentIndex++;
+          playToneSequence(tones);
+        }, 167);
+      } else {
+        currentIndex = 0;
+        toneLoop = setTimeout(function () {
+          playRandomTones();
+        }, 1000);
+      }
+    }
+
+    function stopToneLoop() {
+      clearTimeout(toneLoop);
+    }
+  </script>
+</head>
+<body>
+  <h1>Terapie impotriva tinitusului prin mascare</h1>
+  <input type="number" id="inputNumber" placeholder="0-15000">
+  <button onclick="playFrequency()">Redare</button>
+  <button onclick="stopFrequency()">Opreste</button>
+  <button onclick="generateFrequency()">Genereaza tonuri de terapie</button>
+
+  <div id="tones">
+    <h2>Tonuri de Terapie</h2>
+    <div id="tone1"></div>
+    <button onclick="playTone('Tone 1')">Redare</button>
+    <button onclick="stopTone()">Opreste</button>
+
+    <div id="tone2"></div>
+    <button onclick="playTone('Tone 2')">Redare</button>
+    <button onclick="stopTone()">Opreste</button>
+
+    <div id="tone3"></div>
+    <button onclick="playTone('Tone 3')">Redare</button>
+    <button onclick="stopTone()">Opreste</button>
+
+    <div id="tone4"></div>
+    <button onclick="playTone('Tone 4')">Redare</button>
+    <button onclick="stopTone()">Opreste</button>
+  </div>
+
+  <button onclick="playRandomTones()">Start procedura</button>
+  <button onclick="stopToneLoop()">Opreste</button>
+</body>
+</html>
